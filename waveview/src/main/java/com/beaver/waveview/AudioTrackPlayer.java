@@ -13,8 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 public class AudioTrackPlayer {
 
@@ -22,7 +20,7 @@ public class AudioTrackPlayer {
     private final String OUTPUT_DIR;
     private static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_MUSIC;
     private int DEFAULT_SAMPLE_RATE = 44100;
-    private int DEFAULT_CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_STEREO;
+    private int DEFAULT_CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_MONO;
     private int DEFAULT_AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
 
     private AudioTrack mAudioTrack;
@@ -127,6 +125,7 @@ public class AudioTrackPlayer {
         @Override
         public void run() {
             byte[] audioData = new byte[mMinBufferSize];
+            mAudioTrack.play();
             try {
                 while (!mIsLoopExit && mDataInputStream.read(audioData, 0, audioData.length) > 0) {
                     int ret = mAudioTrack.write(audioData, 0, audioData.length);
@@ -136,7 +135,6 @@ public class AudioTrackPlayer {
                     if (iAudioCaptureListener != null) {
                         iAudioCaptureListener.onCaptureFrame(audioData, ret);
                     }
-                    mAudioTrack.play();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
