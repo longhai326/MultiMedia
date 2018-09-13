@@ -12,24 +12,20 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.lh.mediatest.util.PermissionUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PermissionUtils.PermissionGrant {
 
     private static final String TAG = "LH/MainActivity";
     private SoundPool mSoundPool;
     private Map<String, Integer> mPoolMap;
     private boolean poolLoadCompleted;
     private int mPlayingId;
-
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +43,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Example of a call to a native method
-        TextView tv = (TextView) findViewById(R.id.sample_text);
-        tv.setText(stringFromJNI());
+        PermissionUtils.requestMultiPermissions(this, this);
 
         mPoolMap = new HashMap<String, Integer>();
         // 实例化SoundPool，大小为3
@@ -104,11 +98,12 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
+    @Override
+    public void onPermissionGranted(int requestCode) {
+        if (requestCode == PermissionUtils.CODE_MULTI_PERMISSION) {
+            Log.d(TAG, "onPermissionGranted");
+        }
+    }
 
     public void onRecording(View view) {
         startActivity(new Intent(this, RecordingActivity.class));
@@ -129,4 +124,9 @@ public class MainActivity extends AppCompatActivity {
         mPlayingId = mSoundPool.play(mPoolMap.get("audio2"), 1.0f, 1.0f, 0, 0,
                 1.0f);
     }
+
+    public void onJNICall(View view) {
+        startActivity(new Intent(this, FFmpegActivity.class));
+    }
+
 }
